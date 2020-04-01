@@ -10,10 +10,11 @@ import (
 )
 
 type FFVideo struct {
-	FilePath string
-	Metadata MetadataInfo
-	Audio    AudioInfo
-	Quality  QualityInfo
+	FilePath                  string
+	Metadata                  MetadataInfo
+	Audio                     AudioInfo
+	Quality                   QualityInfo
+	Duration, Bitrate, Format string
 }
 
 type MetadataInfo struct {
@@ -62,11 +63,24 @@ func (ffvideo *FFVideo) parse(data string) error {
 
 	data = "\n" + data
 	data = data[strings.Index(data, "\nInput "):]
-	fmt.Println(data)
+	ffvideo.parseSelf(data)
 	ffvideo.parseMetadata(data)
 	ffvideo.parseAudio(data)
 	ffvideo.parseQuality(data)
 	return nil
+}
+
+func (ffvideo *FFVideo) parseSelf(data string) {
+	data = strings.Split(data, "  Duration:")[1]
+	data = strings.ReplaceAll(data, " ", "")
+	fmt.Println(data)
+	ffvideo.Duration = data[:strings.Index(data, ",")]
+	ffvideo.Bitrate = data[strings.Index(data, "bitrate:")+8 : strings.Index(data, "\n")]
+	ffvideo.Format = data
+	if strings.Contains(data, "Video:") {
+		ffvideo.Format = data[strings.Index(data, "Video:")+6:]
+		ffvideo.Format = ffvideo.Format[:strings.Index(ffvideo.Format, ",")]
+	}
 }
 
 func (ffvideo *FFVideo) parseMetadata(data string) {
