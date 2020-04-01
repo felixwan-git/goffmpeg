@@ -2,10 +2,11 @@ package media
 
 import (
 	"fmt"
-	"goffmpeg/file"
-	"goffmpeg/utils"
 	"strconv"
 	"strings"
+
+	"github.com/felixwan-git/goffmpeg/file"
+	"github.com/felixwan-git/goffmpeg/utils"
 )
 
 type FFVideo struct {

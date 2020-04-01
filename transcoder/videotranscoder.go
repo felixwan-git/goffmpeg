@@ -2,14 +2,15 @@ package transcoder
 
 import (
 	"fmt"
-	"goffmpeg/file"
-	"goffmpeg/media"
-	"goffmpeg/utils"
 	"log"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+
+	"github.com/felixwan-git/goffmpeg/file"
+	"github.com/felixwan-git/goffmpeg/media"
+	"github.com/felixwan-git/goffmpeg/utils"
 )
 
 type VideoTranscoder struct {
