@@ -2,6 +2,7 @@ package media
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -54,6 +55,19 @@ func (ffvideo *FFVideo) GetInfo() (*FFVideo, error) {
 		return ffvideo, fmt.Errorf("Parse video info failed,%s output[%s]", err, output)
 	}
 	return ffvideo, nil
+}
+
+func (ffvideo *FFVideo) CutVideo(segmentFile, start, end string, args ...string) error {
+	commands := []string{"-i", ffvideo.FilePath, "-ss", start, "-to", end}
+	commands = append(commands, args...)
+	commands = append(commands, segmentFile)
+
+	output, err, stderr := utils.ExecCommand(utils.FFMpegCommand, commands...)
+	if err != nil {
+		return fmt.Errorf("cut video failed, FilePath[%s] segmentFile[%s],err[%s], out[%s], stderr[%s]", ffvideo.FilePath, segmentFile, err, output, stderr)
+	}
+	log.Printf("cut video done. output[%s] stdoutput[%s]", output, stderr)
+	return nil
 }
 
 func (ffvideo *FFVideo) parse(data string) error {
