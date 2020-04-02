@@ -3,6 +3,8 @@ package media
 import (
 	"fmt"
 	"log"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -58,10 +60,18 @@ func (ffvideo *FFVideo) GetInfo() (*FFVideo, error) {
 }
 
 func (ffvideo *FFVideo) CutVideo(segmentFile, start, end string, args ...string) error {
+	var err error
+	dir := path.Dir(segmentFile)
+	if !file.Exists(dir) {
+		err = os.MkdirAll(dir, os.ModePerm)
+	}
+	if err != nil {
+		return fmt.Errorf("segment file path invalid(%s), Path(%s)", err, segmentFile)
+	}
+
 	commands := []string{"-i", ffvideo.FilePath, "-ss", start, "-to", end}
 	commands = append(commands, args...)
 	commands = append(commands, segmentFile)
-
 	output, err, stderr := utils.ExecCommand(utils.FFMpegCommand, commands...)
 	if err != nil {
 		return fmt.Errorf("cut video failed, FilePath[%s] segmentFile[%s],err[%s], out[%s], stderr[%s]", ffvideo.FilePath, segmentFile, err, output, stderr)
@@ -173,7 +183,8 @@ func (ffvideo *FFVideo) parseQuality(data string) {
 		}
 		if strings.Contains(item, "SAR") {
 			ffvideo.Quality.SAR = item[strings.Index(item, "SAR")+3 : strings.Index(item, "DAR")]
-			dar := item[strings.Index(item, "DAR")+3 : strings.LastIndex(item, "]")]
+			item = strings.ReplaceAll(item, "]", "")
+			dar := item[strings.Index(item, "DAR")+3:]
 			darArray := strings.Split(dar, ":")
 			ffvideo.Quality.DARWidthScale, _ = strconv.Atoi(darArray[0])
 			ffvideo.Quality.DARHeightScale, _ = strconv.Atoi(darArray[1])
